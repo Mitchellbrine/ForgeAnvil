@@ -15,4 +15,12 @@ public class ConfigUtil {
         return false;
     }
 
+    public static boolean convertIntToBoolean(int integer) {
+        switch(integer) {
+            case 0: return false;
+            case 1: return true;
+            default: return false;
+        }
+    }
+
 }

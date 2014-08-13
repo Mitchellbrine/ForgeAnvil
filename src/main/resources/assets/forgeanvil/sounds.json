@@ -1,0 +1,4 @@
+  {
+  "chat": {"category": "block","sounds": [{"name":"chat","stream": false}]},
+  "chatmention": {"category": "block","sounds": [{"name":"chatmention","stream": false}]}
+  }

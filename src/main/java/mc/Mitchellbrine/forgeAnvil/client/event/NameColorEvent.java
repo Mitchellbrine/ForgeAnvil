@@ -8,10 +8,12 @@ public class NameColorEvent {
 
     @SubscribeEvent
     public void getName(PlayerEvent.NameFormat event) {
-        if (ForgeAnvil.nameColors.get(event.entityPlayer.getGameProfile().getId().toString()) != null) {
-            event.displayname = ForgeAnvil.nameColors.get(event.entityPlayer.getGameProfile().getId().toString()) + event.username;
-        } else {
-            System.err.println(event.entityPlayer.getGameProfile().getId().toString());
+        if (ForgeAnvil.showPlayerColors) {
+            if (ForgeAnvil.nameColors.get(event.entityPlayer.getGameProfile().getId().toString()) != null) {
+                event.displayname = ForgeAnvil.nameColors.get(event.entityPlayer.getGameProfile().getId().toString()) + event.username;
+            } else {
+                System.err.println(event.entityPlayer.getGameProfile().getId().toString());
+            }
         }
     }
 

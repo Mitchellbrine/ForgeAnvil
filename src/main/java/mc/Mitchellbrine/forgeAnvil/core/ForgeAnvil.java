@@ -1,10 +1,13 @@
 package mc.Mitchellbrine.forgeAnvil.core;
 
+import cpw.mods.fml.client.event.ConfigChangedEvent;
+import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.event.*;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import mc.Mitchellbrine.forgeAnvil.client.event.ChatEvent;
 import mc.Mitchellbrine.forgeAnvil.client.event.NameColorEvent;
+import mc.Mitchellbrine.forgeAnvil.config.ConfigUtil;
 import mc.Mitchellbrine.forgeAnvil.core.aml.AML;
 import mc.Mitchellbrine.forgeAnvil.core.mod.AnvilMod;
 import net.minecraft.client.Minecraft;
@@ -12,6 +15,7 @@ import net.minecraft.crash.CrashReport;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.config.Configuration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -21,7 +25,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
-@Mod(modid = "ForgeAnvil", version = "1.0", useMetadata=true)
+@Mod(modid = "ForgeAnvil", version = "1.0", useMetadata=true, guiFactory = "mc.Mitchellbrine.forgeAnvil.config.FAGuiFactory")
 public class ForgeAnvil extends AnvilMod {
 
     public static Logger logger = LogManager.getLogger("ForgeAnvil");
@@ -29,6 +33,14 @@ public class ForgeAnvil extends AnvilMod {
     public static HashMap<String,EnumChatFormatting> nameColors = new HashMap<String, EnumChatFormatting>();
 
     public static ResourceLocation splashTexts = new ResourceLocation("texts/splashes.txt");
+
+    public static Configuration config;
+
+    private static int playChatInt;
+    private static int showColorInt;
+
+    public static boolean playChatSounds;
+    public static boolean showPlayerColors;
 
     public ForgeAnvil() {
         super("ForgeAnvil", 1,"1.0");
@@ -80,15 +92,21 @@ public class ForgeAnvil extends AnvilMod {
             w.println("                   ");
             w.println("                   ");
             w.close();
-        } catch ( IOException e ) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
         MinecraftForge.EVENT_BUS.register(new NameColorEvent());
         MinecraftForge.EVENT_BUS.register(new ChatEvent());
 
-        this.addDonorColor("2b00c656-72f7-3d5b-85c1-da3c09cac1e8",2);
-        this.addDonorColor("bea5e0c485c4454da081e1eaae6895ee",2);
+        this.addDonorColor("2b00c656-72f7-3d5b-85c1-da3c09cac1e8", 2);
+        this.addDonorColor("bea5e0c485c4454da081e1eaae6895ee", 2);
+
+        config = new Configuration(new File("ForgeAnvil/mod-properties/ForgeAnvil.cfg"));
+
+        syncConfig();
+
+        FMLCommonHandler.instance().bus().register(this);
 
     }
 
@@ -105,6 +123,15 @@ public class ForgeAnvil extends AnvilMod {
         logger.warn("                   ");
     }
 
+    public void syncConfig() {
+        showColorInt = config.get("chat", "Show Donator Colors?", 1, "Show Donator Colors?\n0 = false\n1 = true", 0, 1).getInt();
+        playChatInt = config.get("chat", "Play Chat Sounds?", 1, "Play Chat Sounds?\n0 = false\n1 = true", 0, 1).getInt();
+
+        if (config.hasChanged()) {
+            config.save();
+        }
+    }
+
     public void addDonorColor(String playerName, int level) {
         switch(level) {
             case 0: nameColors.put(playerName,EnumChatFormatting.DARK_AQUA); break;
@@ -115,6 +142,19 @@ public class ForgeAnvil extends AnvilMod {
 
     public void addDonorColor(String playerName, EnumChatFormatting formatting) {
         nameColors.put(playerName,formatting);
+    }
+
+    @Mod.EventHandler
+    public void loadWorld(FMLServerStartedEvent event) {
+        showPlayerColors = ConfigUtil.convertIntToBoolean(showColorInt);
+        playChatSounds = ConfigUtil.convertIntToBoolean(playChatInt);
+    }
+
+    @SubscribeEvent
+    public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent event) {
+        if (event.modID.equals("ForgeAnvil")) {
+            syncConfig();
+        }
     }
 
 
