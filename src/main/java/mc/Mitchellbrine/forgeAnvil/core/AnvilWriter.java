@@ -4,11 +4,25 @@ import java.io.*;
 
 public class AnvilWriter {
 
+    @SuppressWarnings("deprecated")
     public static void makeClasses(){
             File file = new File("ForgeAnvil/disclaimer.txt");
             file.getParentFile().mkdir();
             File file2 = new File("ForgeAnvil/mod-properties/ForgeAnvil.properties");
             file2.getParentFile().mkdir();
+            File file3 = new File("ForgeAnvil/mods/anvil-default.info");
+        try {
+            PrintWriter mods = writer("ForgeAnvil/mods/anvil-default.info");
+            mods.println("# The Default anvil.info #");
+            mods.println("name: Forge Anvil");
+            mods.println("version: 1.0");
+            mods.println("author: ForgeAnvil Team");
+            mods.println("load: --Use a url like 'file:/C:/mods/Workspace 2.0/ForgeAnvil/eclipse/./ForgeAnvil/mods/ForgeAnvil-1.0.jar' '.' is instead of the main Minecraft directory (this shouldn't matter)");
+            mods.println("");
+            mods.close();
+        } catch (IOException ex) {
+
+        }
     }
 
     /**
@@ -60,7 +74,9 @@ public class AnvilWriter {
      */
     public static String readText(String modid, String fileName) throws IOException {
         BufferedReader versionFile = new BufferedReader(new InputStreamReader(new FileInputStream(new File("ForgeAnvil/mods/" + modid + "/" + fileName))));
-        return versionFile.readLine();
+        String readString = versionFile.readLine();
+        versionFile.close();
+        return readString;
     }
 
 }

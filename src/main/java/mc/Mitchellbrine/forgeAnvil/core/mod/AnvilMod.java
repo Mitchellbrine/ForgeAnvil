@@ -42,6 +42,7 @@ public class AnvilMod {
         FMLCommonHandler.instance().bus().register(this);
     }
 
+    @SuppressWarnings("deprecation")
     public AnvilMod(String modid, int useMODID) {
         buildErrorMessages();
         if (useMODID == 1) {
@@ -159,13 +160,6 @@ public class AnvilMod {
 
         try {
             File file = new File("ForgeAnvil/errorSplashes.txt");
-            if (!file.exists()) {
-                PrintWriter pr = AnvilWriter.writer("ForgeAnvil/errorSplashes.txt");
-                for (int i = 0; i < errorMessages.length; i++) {
-                    AnvilWriter.write(pr, "-- " + errorMessages[i]);
-                }
-                pr.close();
-            } else {
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(new File("ForgeAnvil/errorSplashes.txt"))));
             String str;
@@ -175,9 +169,17 @@ public class AnvilMod {
                     errorSplashes.add(str.substring(3));
                 }
             }
-            }
+            reader.close();
         } catch (FileNotFoundException ex) {
-            ex.printStackTrace();
+            try {
+                PrintWriter pr = AnvilWriter.writer("ForgeAnvil/errorSplashes.txt");
+                for (int i = 0; i < errorMessages.length; i++) {
+                    AnvilWriter.write(pr, "-- " + errorMessages[i]);
+                }
+                pr.close();
+            } catch (IOException ex2) {
+                ex.printStackTrace();
+            }
         } catch (IOException ex) {
             ex.printStackTrace();
         }

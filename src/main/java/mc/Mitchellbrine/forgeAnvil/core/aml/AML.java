@@ -1,21 +1,57 @@
 package mc.Mitchellbrine.forgeAnvil.core.aml;
 
-import cpw.mods.fml.relauncher.FMLInjectionData;
-import cpw.mods.fml.relauncher.IFMLCallHook;
-import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
-
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-public class AML implements IFMLLoadingPlugin, IFMLCallHook{
+import mc.Mitchellbrine.forgeAnvil.core.ForgeAnvil;
+import net.minecraft.launchwrapper.LaunchClassLoader;
+import cpw.mods.fml.common.Loader;
+import cpw.mods.fml.common.ModClassLoader;
+import cpw.mods.fml.relauncher.FMLInjectionData;
+import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
+
+public class AML implements IFMLLoadingPlugin{
 
     public static AMLInst inst;
 
     public static ArrayList<String> names = new ArrayList<String>();
     public static HashMap<String,String> versions = new HashMap<String, String>();
     public static HashMap<String,String> authors = new HashMap<String, String>();
+
+    public AML() {
+    }
+
+    private static void addModURL(String url) {
+        try {
+            ((LaunchClassLoader) AML.class.getClassLoader()).addURL(new URL(url));
+            ForgeAnvil.logger.info("Loaded File: " + url);
+        } catch (MalformedURLException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private static void addMod(File url) {
+        try {
+            ((LaunchClassLoader) AML.class.getClassLoader()).addURL(url.toURI().toURL());
+            ForgeAnvil.logger.info("Loaded File: " + url);
+        } catch (MalformedURLException ex) {
+            ex.printStackTrace();
+        }
+    }
+
 
     @Override
     public String[] getASMTransformerClass() {
@@ -24,12 +60,13 @@ public class AML implements IFMLLoadingPlugin, IFMLCallHook{
 
     @Override
     public String getModContainerClass() {
-        return null;
+        System.err.println(AMLCore.class.getName());
+        return AMLCore.class.getName();
     }
 
     @Override
     public String getSetupClass() {
-        return getClass().getName();
+        return null;
     }
 
     @Override
@@ -39,12 +76,6 @@ public class AML implements IFMLLoadingPlugin, IFMLCallHook{
 
     @Override
     public String getAccessTransformerClass() {
-        return null;
-    }
-
-    @Override
-    public Void call() throws Exception {
-        load();
         return null;
     }
 
@@ -59,7 +90,7 @@ public class AML implements IFMLLoadingPlugin, IFMLCallHook{
     private static class AMLInst {
 
         File mcDir = (File) FMLInjectionData.data()[6];
-        File modsFolder = new File(mcDir,"mods");
+        File modsFolder = new File(mcDir,"ForgeAnvil/mods");
 
         private void scanForMods() {
             for (File file : modFiles()) {
@@ -72,20 +103,24 @@ public class AML implements IFMLLoadingPlugin, IFMLCallHook{
         private void findModFile(File file) {
             try {
                 ZipFile zip = new ZipFile(file);
+                System.err.println(zip.getName());
                 ZipEntry e = zip.getEntry("anvil.info");
                 if (e == null) e = zip.getEntry("anvil.info");
                 if (e != null)
                     findInformation(zip.getInputStream(e));
                 zip.close();
+                ((LaunchClassLoader)AML.class.getClassLoader()).addURL(file.toURI().toURL());
             } catch (Exception e) {
-                System.err.println("Failed to find anvil.info from " + file.getName());
+                ForgeAnvil.logger.fatal("Failed to find anvil.info from " + file.getName());
                 e.printStackTrace();
             }
         }
 
         private List<File> modFiles() {
             List<File> list = new LinkedList<File>();
-            list.addAll(Arrays.asList(modsFolder.listFiles()));
+            if (modsFolder.listFiles() != null) {
+                list.addAll(Arrays.asList(modsFolder.listFiles()));
+            }
             return list;
         }
 
@@ -106,11 +141,20 @@ public class AML implements IFMLLoadingPlugin, IFMLCallHook{
                 } else if (str.startsWith("author: ") || str.startsWith("author:")) {
                     if (str.startsWith("author: ")) authorName = str.substring(8);
                     else authorName = str.substring(7);
+                } else if (str.startsWith("load: ") || str.startsWith("load:")) {
+                    if (!str.contains("--")) {
+                        if (str.startsWith("load: ")) addModURL(str.substring(6));
+                        else addModURL(str.substring(5));
+                    } else {
+                        if (str.startsWith("load: ")) addModURL(str.substring(6,str.indexOf("---")));
+                        else addModURL(str.substring(5,str.indexOf("---")));
+                    }
                 }
             }
             names.add(modName);
             versions.put(modName, versionName);
             authors.put(modName, authorName);
+
         }
     }
 

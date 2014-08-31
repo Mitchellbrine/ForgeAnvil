@@ -6,10 +6,12 @@ import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.event.*;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import mc.Mitchellbrine.forgeAnvil.client.event.ChatEvent;
+import mc.Mitchellbrine.forgeAnvil.client.event.MenuEvent;
 import mc.Mitchellbrine.forgeAnvil.client.event.NameColorEvent;
 import mc.Mitchellbrine.forgeAnvil.config.ConfigUtil;
 import mc.Mitchellbrine.forgeAnvil.core.aml.AML;
 import mc.Mitchellbrine.forgeAnvil.core.mod.AnvilMod;
+import mc.Mitchellbrine.forgeAnvil.util.IntBoolean;
 import net.minecraft.client.Minecraft;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.util.EnumChatFormatting;
@@ -25,7 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
-@Mod(modid = "ForgeAnvil", version = "1.0", useMetadata=true, guiFactory = "mc.Mitchellbrine.forgeAnvil.config.FAGuiFactory")
+@Mod(modid = ModInfo.NAME, version = ModInfo.VERSION, useMetadata=true, guiFactory = "mc.Mitchellbrine.forgeAnvil.config.FAGuiFactory")
 public class ForgeAnvil extends AnvilMod {
 
     public static Logger logger = LogManager.getLogger("ForgeAnvil");
@@ -36,19 +38,14 @@ public class ForgeAnvil extends AnvilMod {
 
     public static Configuration config;
 
-    private static int playChatInt;
-    private static int showColorInt;
+    private static IntBoolean playChatInt;
+    private static IntBoolean showColorInt;
 
     public static boolean playChatSounds;
     public static boolean showPlayerColors;
 
     public ForgeAnvil() {
         super("ForgeAnvil", 1,"1.0");
-    }
-
-    @Mod.EventHandler
-    public void construct(FMLConstructionEvent event) {
-        AML.load();
     }
 
     @Mod.EventHandler
@@ -107,7 +104,7 @@ public class ForgeAnvil extends AnvilMod {
         syncConfig();
 
         FMLCommonHandler.instance().bus().register(this);
-
+        MinecraftForge.EVENT_BUS.register(new MenuEvent());
     }
 
     @Mod.EventHandler
@@ -124,8 +121,8 @@ public class ForgeAnvil extends AnvilMod {
     }
 
     public void syncConfig() {
-        showColorInt = config.get("chat", "Show Donator Colors?", 1, "Show Donator Colors?\n0 = false\n1 = true", 0, 1).getInt();
-        playChatInt = config.get("chat", "Play Chat Sounds?", 1, "Play Chat Sounds?\n0 = false\n1 = true", 0, 1).getInt();
+        showColorInt = new IntBoolean(config.get("chat", "Show Donator Colors?", 1, "Show Donator Colors?\n0 = false\n1 = true", 0, 1).getInt());
+        playChatInt = new IntBoolean(config.get("chat", "Play Chat Sounds?", 1, "Play Chat Sounds?\n0 = false\n1 = true", 0, 1).getInt());
 
         if (config.hasChanged()) {
             config.save();
@@ -146,8 +143,8 @@ public class ForgeAnvil extends AnvilMod {
 
     @Mod.EventHandler
     public void loadWorld(FMLServerStartedEvent event) {
-        showPlayerColors = ConfigUtil.convertIntToBoolean(showColorInt);
-        playChatSounds = ConfigUtil.convertIntToBoolean(playChatInt);
+        showPlayerColors = showColorInt.getBoolean();
+        playChatSounds = playChatInt.getBoolean();
     }
 
     @SubscribeEvent
