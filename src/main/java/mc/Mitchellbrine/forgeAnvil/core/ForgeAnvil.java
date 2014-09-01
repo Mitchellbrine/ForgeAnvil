@@ -10,6 +10,7 @@ import mc.Mitchellbrine.forgeAnvil.client.event.MenuEvent;
 import mc.Mitchellbrine.forgeAnvil.client.event.NameColorEvent;
 import mc.Mitchellbrine.forgeAnvil.config.ConfigUtil;
 import mc.Mitchellbrine.forgeAnvil.core.aml.AML;
+import mc.Mitchellbrine.forgeAnvil.core.aml.AMLCore;
 import mc.Mitchellbrine.forgeAnvil.core.mod.AnvilMod;
 import mc.Mitchellbrine.forgeAnvil.util.IntBoolean;
 import net.minecraft.client.Minecraft;
@@ -51,28 +52,32 @@ public class ForgeAnvil extends AnvilMod {
     @Mod.EventHandler
     public void init(FMLPreInitializationEvent event) {
 
-        logger.info("");
-        logger.info("");
-        logger.info("~ ~ ~ ~ ~ ~ ~ ~ ~ ~");
-        logger.info("Found " + AML.names.size() + " mods that use ForgeAnvil! The following mods were loaded: ");
+        AMLCore.logger.info("");
+        AMLCore.logger.info("");
+        AMLCore.logger.info("~ ~ ~ ~ ~ ~ ~ ~ ~ ~");
+        if (AML.names.size() != 1) {
+            AMLCore.logger.info("Found " + AML.names.size() + " mods that use ForgeAnvil! The following mods were loaded: ");
+        } else {
+            AMLCore.logger.info("Found " + AML.names.size() + " mod that uses ForgeAnvil! The following mod was loaded: ");
+        }
         if (AML.names.size() > 0) {
-            logger.info("~ ~ ~ ~ ~ ~ ~ ~ ~ ~");
+            AMLCore.logger.info("~ ~ ~ ~ ~ ~ ~ ~ ~ ~");
             for (int i = 0; i < AML.names.size(); i++) {
-                logger.info("Mod Name: " + AML.names.get(i));
+                AMLCore.logger.info("Mod Name: " + AML.names.get(i));
                 if (AML.versions.get(AML.names.get(i)) != null) {
-                    logger.info("Mod Version: " + AML.versions.get(AML.names.get(i)));
+                    AMLCore.logger.info("Mod Version: " + AML.versions.get(AML.names.get(i)));
                 }
                 if (AML.authors.get(AML.names.get(i)) != null) {
-                    logger.info("Mod Author: " + AML.authors.get(AML.names.get(i)));
+                    AMLCore.logger.info("Mod Author: " + AML.authors.get(AML.names.get(i)));
                 }
-                logger.info("~ ~ ~ ~ ~ ~ ~ ~ ~ ~");
+                AMLCore.logger.info("~ ~ ~ ~ ~ ~ ~ ~ ~ ~");
             }
-            logger.info("");
-            logger.info("");
+            AMLCore.logger.info("");
+            AMLCore.logger.info("");
         } else {
-            logger.info("~ ~ ~ ~ ~ ~ ~ ~ ~ ~");
-            logger.info("");
-            logger.info("");
+            AMLCore.logger.info("~ ~ ~ ~ ~ ~ ~ ~ ~ ~");
+            AMLCore.logger.info("");
+            AMLCore.logger.info("");
         }
 
         AnvilWriter.makeClasses();

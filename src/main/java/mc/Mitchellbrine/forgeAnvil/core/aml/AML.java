@@ -41,8 +41,15 @@ public class AML implements IFMLLoadingPlugin{
             } else {
                 ((LaunchClassLoader) AML.class.getClassLoader()).addURL(new URL(url));
                 modsLoaded.add(new File(url));
-                AMLCore.logger.info("Loaded File: " + url);
+                if (url.contains("/")) {
+                    AMLCore.logger.info("Loaded File: " + url.substring(url.lastIndexOf("/") + 1));
+                } else if (url.contains("\\")){
+                    AMLCore.logger.info("Loaded File: " + url.substring(url.lastIndexOf("\\") + 1));
+                } else {
+                    AMLCore.logger.info("Loaded File: " + url);
+                }
             }
+            zip.close();
 
         } catch (MalformedURLException ex) {
             ex.printStackTrace();
@@ -71,7 +78,13 @@ public class AML implements IFMLLoadingPlugin{
         try {
             ((LaunchClassLoader) AML.class.getClassLoader()).addURL(url.toURI().toURL());
             modsLoaded.add(url);
-            AMLCore.logger.info("Loaded File: " + url);
+            if (url.getPath().contains("/")) {
+                AMLCore.logger.info("Loaded File: " + url.getPath().substring(url.getPath().lastIndexOf("/") + 1));
+            } else if (url.getPath().contains("\\")){
+                AMLCore.logger.info("Loaded File: " + url.getPath().substring(url.getPath().lastIndexOf("\\") + 1));
+            } else {
+                AMLCore.logger.info("Loaded File: " + url);
+            }
         } catch (MalformedURLException ex) {
             ex.printStackTrace();
         }
@@ -271,10 +284,17 @@ public class AML implements IFMLLoadingPlugin{
                 if (e == null) {
                     ((LaunchClassLoader) AML.class.getClassLoader()).addURL(target.toURI().toURL());
                     modsLoaded.add(target);
-                    AMLCore.logger.info("Loaded File: " + target);
+                    if (target.getPath().contains("/")) {
+                        AMLCore.logger.info("Loaded File: " + target.getPath().substring(target.getPath().lastIndexOf("/") + 1));
+                    } else if (target.getPath().contains("\\")){
+                        AMLCore.logger.info("Loaded File: " + target.getPath().substring(target.getPath().lastIndexOf("\\") + 1));
+                    } else {
+                        AMLCore.logger.info("Loaded File: " + target.getPath());
+                    }
                 } else {
                     unzip(target,mcDir);
                 }
+                zip.close();
 
                 /*}
                 else
@@ -304,6 +324,7 @@ public class AML implements IFMLLoadingPlugin{
                     }
                 }
             }
+            zfile.close();
         }
 
         private static void copy(InputStream in, OutputStream out) throws IOException {

@@ -25,11 +25,11 @@ public AMLCore() {
     ModMetadata meta = getMetadata();
     meta.modId = "AML";
     meta.name = "AnvilModLoader";
-    meta.version = "@VERSION@";
+    meta.version = "1.0";
     meta.credits = "All the Forge Anvil Team";
     meta.authorList = Arrays.asList("Mitchellbrine");
-    meta.description = "";
-    meta.url = "https://github.com/mitchellbrine/ForgeAnvil";
+    meta.description = "An easy one file way to load dependencies and modpacks!";
+    meta.url = "https://github.com/Mitchellbrine/ForgeAnvil/blob/master/src/main/java/mc/Mitchellbrine/forgeAnvil/core/aml/AML.java";
     meta.updateUrl = "";
     meta.screenshots = new String[0];
     meta.logoFile = "";
