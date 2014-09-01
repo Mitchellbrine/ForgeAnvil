@@ -93,6 +93,7 @@ public class ForgeAnvil extends AnvilMod {
             e.printStackTrace();
         }
 
+
         MinecraftForge.EVENT_BUS.register(new NameColorEvent());
         MinecraftForge.EVENT_BUS.register(new ChatEvent());
 
@@ -118,6 +119,31 @@ public class ForgeAnvil extends AnvilMod {
         logger.warn("~ ~ ~ ~ ~ ~ ~ ~ ~ ~");
         logger.warn("                   ");
         logger.warn("                   ");
+
+        try {
+            PrintWriter pr = new PrintWriter("logs/aml.log");
+            pr.println("~ ~ ~ ~ ~ ~ ~ ~ ~ ~");
+            if (AML.modsLoaded.size() > 0) {
+                for (int i = 0; i < AML.modsLoaded.size(); i++) {
+                pr.println("");
+                if (AML.modsLoaded.get(i).getPath().contains("/")) {
+                    pr.println("Loaded Mod-File: " + AML.modsLoaded.get(i).getPath().substring(AML.modsLoaded.get(i).getPath().lastIndexOf("/") + 1));
+                } else if (AML.modsLoaded.get(i).getPath().contains("\\")){
+                    pr.println("Loaded Mod-File: " + AML.modsLoaded.get(i).getPath().substring(AML.modsLoaded.get(i).getPath().lastIndexOf("\\") + 1));
+                } else {
+                    pr.println("Loaded Mod-File: " + AML.modsLoaded.get(i).getPath());
+                }
+                pr.println("");
+                }
+            } else {
+                pr.println("No mods were loaded! *sheds tear* D:");
+            }
+            pr.println("~ ~ ~ ~ ~ ~ ~ ~ ~ ~");
+            pr.close();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
     }
 
     public void syncConfig() {

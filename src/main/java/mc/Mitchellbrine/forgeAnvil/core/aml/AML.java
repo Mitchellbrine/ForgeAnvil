@@ -27,6 +27,8 @@ public class AML implements IFMLLoadingPlugin{
 
     public static AMLInst inst;
 
+    public static ArrayList<File> modsLoaded = new ArrayList<File>();
+
     public static ArrayList<String> names = new ArrayList<String>();
     public static HashMap<String,String> versions = new HashMap<String, String>();
     public static HashMap<String,String> authors = new HashMap<String, String>();
@@ -37,6 +39,7 @@ public class AML implements IFMLLoadingPlugin{
     private static void addModPath(String url) {
         try {
             ((LaunchClassLoader) AML.class.getClassLoader()).addURL(new URL(url));
+            modsLoaded.add(new File(url));
             AMLCore.logger.info("Loaded File: " + url);
         } catch (MalformedURLException ex) {
             ex.printStackTrace();
@@ -60,6 +63,7 @@ public class AML implements IFMLLoadingPlugin{
     private static void addMod(File url) {
         try {
             ((LaunchClassLoader) AML.class.getClassLoader()).addURL(url.toURI().toURL());
+            modsLoaded.add(url);
             AMLCore.logger.info("Loaded File: " + url);
         } catch (MalformedURLException ex) {
             ex.printStackTrace();
@@ -200,9 +204,37 @@ public class AML implements IFMLLoadingPlugin{
                         }
                     } else {
                         if (str.startsWith("load: ")) {
-                            addModPath(str.substring(6));
+                            String[] mods = str.substring(6).split(",");
+                            for (File files : dModFiles()) {
+                                files.delete();
+                            }
+                            for (String mod : mods) {
+                                if (!mod.startsWith("http") && !mod.startsWith("https")) {
+                                    addModPath(mod);
+                                } else {
+                                    if (mod.endsWith("zip")) {
+                                        addModURL(new URL(mod));
+                                    } else if (mod.endsWith("jar")) {
+                                        addModURL(new URL(mod));
+                                    }
+                                }
+                            }
                         } else {
-                            addModPath(str.substring(5));
+                            String[] mods = str.substring(5).split(",");
+                            for (File files : dModFiles()) {
+                                files.delete();
+                            }
+                            for (String mod : mods) {
+                                if (!mod.startsWith("http") && !mod.startsWith("https")) {
+                                    addModPath(mod);
+                                } else {
+                                    if (mod.endsWith("zip")) {
+                                        addModURL(new URL(mod));
+                                    } else if (mod.endsWith("jar")) {
+                                        addModURL(new URL(mod));
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -228,6 +260,7 @@ public class AML implements IFMLLoadingPlugin{
 
 
                 ((LaunchClassLoader)AML.class.getClassLoader()).addURL(target.toURI().toURL());
+                modsLoaded.add(target);
                 AMLCore.logger.info("Loaded File: " + target);
 
                 /*}
