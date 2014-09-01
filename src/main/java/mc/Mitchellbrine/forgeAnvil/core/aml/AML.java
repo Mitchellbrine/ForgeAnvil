@@ -1,18 +1,15 @@
 package mc.Mitchellbrine.forgeAnvil.core.aml;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.io.*;
+import java.net.*;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -22,8 +19,11 @@ import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.ModClassLoader;
 import cpw.mods.fml.relauncher.FMLInjectionData;
 import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
+import org.apache.commons.io.IOUtils;
 
 public class AML implements IFMLLoadingPlugin{
+
+    private static ByteBuffer downloadBuffer = ByteBuffer.allocateDirect(1 << 23);
 
     public static AMLInst inst;
 
@@ -34,11 +34,25 @@ public class AML implements IFMLLoadingPlugin{
     public AML() {
     }
 
-    private static void addModURL(String url) {
+    private static void addModPath(String url) {
         try {
             ((LaunchClassLoader) AML.class.getClassLoader()).addURL(new URL(url));
-            ForgeAnvil.logger.info("Loaded File: " + url);
+            AMLCore.logger.info("Loaded File: " + url);
         } catch (MalformedURLException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private static void addModURL(URL url) {
+        try {
+            File libFile = new File("ForgeAnvil/downloaded-mods/"+url.getPath().substring(url.getPath().lastIndexOf("/")));
+            URLConnection connection = url.openConnection();
+            connection.setConnectTimeout(5000);
+            connection.setReadTimeout(5000);
+            connection.setRequestProperty("User-Agent", "AML Downloader");
+            int sizeGuess = connection.getContentLength();
+            AML.inst.download(connection.getInputStream(), sizeGuess, libFile);
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
@@ -46,7 +60,7 @@ public class AML implements IFMLLoadingPlugin{
     private static void addMod(File url) {
         try {
             ((LaunchClassLoader) AML.class.getClassLoader()).addURL(url.toURI().toURL());
-            ForgeAnvil.logger.info("Loaded File: " + url);
+            AMLCore.logger.info("Loaded File: " + url);
         } catch (MalformedURLException ex) {
             ex.printStackTrace();
         }
@@ -60,7 +74,6 @@ public class AML implements IFMLLoadingPlugin{
 
     @Override
     public String getModContainerClass() {
-        System.err.println(AMLCore.class.getName());
         return AMLCore.class.getName();
     }
 
@@ -91,25 +104,26 @@ public class AML implements IFMLLoadingPlugin{
 
         File mcDir = (File) FMLInjectionData.data()[6];
         File modsFolder = new File(mcDir,"ForgeAnvil/mods");
+        File dModsFolder = new File(mcDir,"ForgeAnvil/downloaded-mods/");
 
         private void scanForMods() {
+            AMLCore.logger.info("~~~~~~~~~~");
             for (File file : modFiles()) {
                 if (!file.getName().endsWith(".jar") && !file.getName().endsWith(".zip"))
                     continue;
                 findModFile(file);
             }
+            AMLCore.logger.info("~~~~~~~~~~");
         }
 
         private void findModFile(File file) {
             try {
                 ZipFile zip = new ZipFile(file);
-                System.err.println(zip.getName());
                 ZipEntry e = zip.getEntry("anvil.info");
                 if (e == null) e = zip.getEntry("anvil.info");
                 if (e != null)
-                    findInformation(zip.getInputStream(e));
+                    findInformation(zip.getInputStream(e),file);
                 zip.close();
-                ((LaunchClassLoader)AML.class.getClassLoader()).addURL(file.toURI().toURL());
             } catch (Exception e) {
                 ForgeAnvil.logger.fatal("Failed to find anvil.info from " + file.getName());
                 e.printStackTrace();
@@ -124,7 +138,15 @@ public class AML implements IFMLLoadingPlugin{
             return list;
         }
 
-        private void findInformation(InputStream inputStream) throws IOException {
+        private List<File> dModFiles() {
+            List<File> list = new LinkedList<File>();
+            if (dModsFolder.listFiles() != null) {
+                list.addAll(Arrays.asList(dModsFolder.listFiles()));
+            }
+            return list;
+        }
+
+        private void findInformation(InputStream inputStream,File file) throws IOException {
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
             String str;
@@ -142,20 +164,82 @@ public class AML implements IFMLLoadingPlugin{
                     if (str.startsWith("author: ")) authorName = str.substring(8);
                     else authorName = str.substring(7);
                 } else if (str.startsWith("load: ") || str.startsWith("load:")) {
-                    if (!str.contains("--")) {
-                        if (str.startsWith("load: ")) addModURL(str.substring(6));
-                        else addModURL(str.substring(5));
+                    if (str.contains(",")) {
+                        if (str.startsWith("load: ")) {
+                            String[] mods = str.substring(6).split(",");
+                            for (File files : dModFiles()) {
+                                files.delete();
+                            }
+                            for (String mod : mods) {
+                                if (!mod.startsWith("http") && !mod.startsWith("https")) {
+                                    addModPath(mod);
+                                } else {
+                                    if (mod.endsWith("zip")) {
+                                        addModURL(new URL(mod));
+                                    } else if (mod.endsWith("jar")) {
+                                        addModURL(new URL(mod));
+                                    }
+                                }
+                            }
+                        } else {
+                            String[] mods = str.substring(5).split(",");
+                            for (File files : dModFiles()) {
+                                files.delete();
+                            }
+                            for (String mod : mods) {
+                                if (!mod.startsWith("http") && !mod.startsWith("https")) {
+                                    addModPath(mod);
+                                } else {
+                                    if (mod.endsWith("zip")) {
+                                        addModURL(new URL(mod));
+                                    } else if (mod.endsWith("jar")) {
+                                        addModURL(new URL(mod));
+                                    }
+                                }
+                            }
+                        }
                     } else {
-                        if (str.startsWith("load: ")) addModURL(str.substring(6,str.indexOf("---")));
-                        else addModURL(str.substring(5,str.indexOf("---")));
+                        if (str.startsWith("load: ")) {
+                            addModPath(str.substring(6));
+                        } else {
+                            addModPath(str.substring(5));
+                        }
                     }
                 }
             }
             names.add(modName);
             versions.put(modName, versionName);
             authors.put(modName, authorName);
-
+            addMod(file);
         }
+
+        private void download(InputStream is, int sizeGuess, File target) throws Exception {
+            try {
+                byte[] buffer = new byte[4096];
+                int n = - 1;
+
+                OutputStream output = new FileOutputStream(target);
+                while ( (n = is.read(buffer)) != -1)
+                {
+
+                    output.write(buffer, 0, n);
+                }
+                    output.close();
+
+
+                ((LaunchClassLoader)AML.class.getClassLoader()).addURL(target.toURI().toURL());
+                AMLCore.logger.info("Loaded File: " + target);
+
+                /*}
+                else
+                {
+                    throw new RuntimeException(String.format("The downloaded file %s has an invalid checksum %s (expecting %s). The download did not succeed correctly and the file has been deleted. Please try launching again.", target.getName(), cksum, validationHash));
+                }*/
+            } catch (Exception e) {
+                throw e;
+            }
+        }
+
     }
 
 }

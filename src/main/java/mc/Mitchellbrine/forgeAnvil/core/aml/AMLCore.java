@@ -13,8 +13,12 @@ import cpw.mods.fml.common.DummyModContainer;
 import cpw.mods.fml.common.LoadController;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.ModMetadata;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class AMLCore extends DummyModContainer{
+
+    public static Logger logger = LogManager.getLogger("AML");
 
 public AMLCore() {
     super(new ModMetadata());
@@ -29,6 +33,7 @@ public AMLCore() {
     meta.updateUrl = "";
     meta.screenshots = new String[0];
     meta.logoFile = "";
+    logger.info("Loading AML...");
     AML.load();
 }
 

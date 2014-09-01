@@ -4,13 +4,16 @@ import java.io.*;
 
 public class AnvilWriter {
 
-    @SuppressWarnings("deprecated")
+    @SuppressWarnings("deprecation")
     public static void makeClasses(){
             File file = new File("ForgeAnvil/disclaimer.txt");
             file.getParentFile().mkdir();
             File file2 = new File("ForgeAnvil/mod-properties/ForgeAnvil.properties");
             file2.getParentFile().mkdir();
             File file3 = new File("ForgeAnvil/mods/anvil-default.info");
+            file3.getParentFile().mkdir();
+            File file4 = new File("ForgeAnvil/downloaded-mods/anvil-default.info");
+            file4.getParentFile().mkdir();
         try {
             PrintWriter mods = writer("ForgeAnvil/mods/anvil-default.info");
             mods.println("# The Default anvil.info #");
