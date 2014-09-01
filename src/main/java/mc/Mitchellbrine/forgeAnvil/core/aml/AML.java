@@ -3,15 +3,11 @@ package mc.Mitchellbrine.forgeAnvil.core.aml;
 import java.io.*;
 import java.net.*;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 import mc.Mitchellbrine.forgeAnvil.core.ForgeAnvil;
 import net.minecraft.launchwrapper.LaunchClassLoader;
@@ -22,8 +18,6 @@ import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
 import org.apache.commons.io.IOUtils;
 
 public class AML implements IFMLLoadingPlugin{
-
-    private static ByteBuffer downloadBuffer = ByteBuffer.allocateDirect(1 << 23);
 
     public static AMLInst inst;
 
@@ -38,10 +32,23 @@ public class AML implements IFMLLoadingPlugin{
 
     private static void addModPath(String url) {
         try {
-            ((LaunchClassLoader) AML.class.getClassLoader()).addURL(new URL(url));
-            modsLoaded.add(new File(url));
-            AMLCore.logger.info("Loaded File: " + url);
+            URI uri = new URI(url);
+            File file = new File(uri);
+            ZipFile zip = new ZipFile(file);
+            ZipEntry z = zip.getEntry("config.info");
+            if (z != null) {
+                AMLInst.unzip(file, AML.inst.mcDir);
+            } else {
+                ((LaunchClassLoader) AML.class.getClassLoader()).addURL(new URL(url));
+                modsLoaded.add(new File(url));
+                AMLCore.logger.info("Loaded File: " + url);
+            }
+
         } catch (MalformedURLException ex) {
+            ex.printStackTrace();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
@@ -259,9 +266,15 @@ public class AML implements IFMLLoadingPlugin{
                     output.close();
 
 
-                ((LaunchClassLoader)AML.class.getClassLoader()).addURL(target.toURI().toURL());
-                modsLoaded.add(target);
-                AMLCore.logger.info("Loaded File: " + target);
+                ZipFile zip = new ZipFile(target);
+                ZipEntry e = zip.getEntry("config" + File.separator);
+                if (e == null) {
+                    ((LaunchClassLoader) AML.class.getClassLoader()).addURL(target.toURI().toURL());
+                    modsLoaded.add(target);
+                    AMLCore.logger.info("Loaded File: " + target);
+                } else {
+                    unzip(target,mcDir);
+                }
 
                 /*}
                 else
@@ -270,6 +283,46 @@ public class AML implements IFMLLoadingPlugin{
                 }*/
             } catch (Exception e) {
                 throw e;
+            }
+        }
+
+        private static void unzip(File zipfile, File directory) throws IOException {
+            ZipFile zfile = new ZipFile(zipfile);
+            Enumeration<? extends ZipEntry> entries = zfile.entries();
+            while (entries.hasMoreElements()) {
+                ZipEntry entry = entries.nextElement();
+                File file = new File(directory, entry.getName());
+                if (entry.isDirectory()) {
+                    file.mkdirs();
+                } else {
+                    file.getParentFile().mkdirs();
+                    InputStream in = zfile.getInputStream(entry);
+                    try {
+                        copy(in, file);
+                    } finally {
+                        in.close();
+                    }
+                }
+            }
+        }
+
+        private static void copy(InputStream in, OutputStream out) throws IOException {
+            byte[] buffer = new byte[1024];
+            while (true) {
+                int readCount = in.read(buffer);
+                if (readCount < 0) {
+                    break;
+                }
+                out.write(buffer, 0, readCount);
+            }
+        }
+
+        private static void copy(InputStream in, File file) throws IOException {
+            OutputStream out = new FileOutputStream(file);
+            try {
+                copy(in, out);
+            } finally {
+                out.close();
             }
         }
 
