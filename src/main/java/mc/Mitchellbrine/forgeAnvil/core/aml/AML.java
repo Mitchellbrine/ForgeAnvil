@@ -28,9 +28,37 @@ public class AML implements IFMLLoadingPlugin{
     public static HashMap<String,String> authors = new HashMap<String, String>();
 
     public AML() {
+
     }
 
-    private static void addModPath(String url) {
+    private static void addConfig(String path) {
+        try {
+            URI uri = new URI(path);
+            File file = new File(uri);
+            ZipFile zip = new ZipFile(file);
+
+            AMLInst.unzip(file, AML.inst.mcDir);
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private static void addConfig(URL url) {
+        try {
+            File libFile = new File("ForgeAnvil/downloaded-configs/"+url.getPath().substring(url.getPath().lastIndexOf("/")));
+            URLConnection connection = url.openConnection();
+            connection.setConnectTimeout(5000);
+            connection.setReadTimeout(5000);
+            connection.setRequestProperty("User-Agent", "AML Downloader");
+            int sizeGuess = connection.getContentLength();
+            AML.inst.downloadConfig(connection.getInputStream(), sizeGuess, libFile);
+        } catch (Exception ex) {
+
+        }
+    }
+
+    private static void addModPath(String url,String modLoading) {
         try {
             URI uri = new URI(url);
             File file = new File(uri);
@@ -42,11 +70,11 @@ public class AML implements IFMLLoadingPlugin{
                 ((LaunchClassLoader) AML.class.getClassLoader()).addURL(new URL(url));
                 modsLoaded.add(new File(url));
                 if (url.contains("/")) {
-                    AMLCore.logger.info("Loaded File: " + url.substring(url.lastIndexOf("/") + 1));
+                    AMLCore.logger.info("Loaded File: " + url.substring(url.lastIndexOf("/") + 1) + " (By " + modLoading + ")");
                 } else if (url.contains("\\")){
-                    AMLCore.logger.info("Loaded File: " + url.substring(url.lastIndexOf("\\") + 1));
+                    AMLCore.logger.info("Loaded File: " + url.substring(url.lastIndexOf("\\") + 1) + " (By " + modLoading + ")");
                 } else {
-                    AMLCore.logger.info("Loaded File: " + url);
+                    AMLCore.logger.info("Loaded File: " + url + " (By " + modLoading + ")");
                 }
             }
             zip.close();
@@ -60,7 +88,7 @@ public class AML implements IFMLLoadingPlugin{
         }
     }
 
-    private static void addModURL(URL url) {
+    private static void addModURL(URL url,String modLoading) {
         try {
             File libFile = new File("ForgeAnvil/downloaded-mods/"+url.getPath().substring(url.getPath().lastIndexOf("/")));
             URLConnection connection = url.openConnection();
@@ -68,7 +96,7 @@ public class AML implements IFMLLoadingPlugin{
             connection.setReadTimeout(5000);
             connection.setRequestProperty("User-Agent", "AML Downloader");
             int sizeGuess = connection.getContentLength();
-            AML.inst.download(connection.getInputStream(), sizeGuess, libFile);
+            AML.inst.download(connection.getInputStream(), sizeGuess, libFile,modLoading);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -119,6 +147,7 @@ public class AML implements IFMLLoadingPlugin{
     public static void load() {
         if (inst == null) {
             inst = new AMLInst();
+            AMLCore.logger.info("Beginning loading for mods...");
             inst.scanForMods();
         }
     }
@@ -191,33 +220,27 @@ public class AML implements IFMLLoadingPlugin{
                     if (str.contains(",")) {
                         if (str.startsWith("load: ")) {
                             String[] mods = str.substring(6).split(",");
-                            for (File files : dModFiles()) {
-                                files.delete();
-                            }
                             for (String mod : mods) {
                                 if (!mod.startsWith("http") && !mod.startsWith("https")) {
-                                    addModPath(mod);
+                                    addModPath(mod,modName);
                                 } else {
                                     if (mod.endsWith("zip")) {
-                                        addModURL(new URL(mod));
+                                        addModURL(new URL(mod),modName);
                                     } else if (mod.endsWith("jar")) {
-                                        addModURL(new URL(mod));
+                                        addModURL(new URL(mod),modName);
                                     }
                                 }
                             }
                         } else {
                             String[] mods = str.substring(5).split(",");
-                            for (File files : dModFiles()) {
-                                files.delete();
-                            }
                             for (String mod : mods) {
                                 if (!mod.startsWith("http") && !mod.startsWith("https")) {
-                                    addModPath(mod);
+                                    addModPath(mod,modName);
                                 } else {
                                     if (mod.endsWith("zip")) {
-                                        addModURL(new URL(mod));
+                                        addModURL(new URL(mod),modName);
                                     } else if (mod.endsWith("jar")) {
-                                        addModURL(new URL(mod));
+                                        addModURL(new URL(mod),modName);
                                     }
                                 }
                             }
@@ -225,33 +248,85 @@ public class AML implements IFMLLoadingPlugin{
                     } else {
                         if (str.startsWith("load: ")) {
                             String[] mods = str.substring(6).split(",");
-                            for (File files : dModFiles()) {
-                                files.delete();
-                            }
                             for (String mod : mods) {
                                 if (!mod.startsWith("http") && !mod.startsWith("https")) {
-                                    addModPath(mod);
+                                    addModPath(mod,modName);
                                 } else {
                                     if (mod.endsWith("zip")) {
-                                        addModURL(new URL(mod));
+                                        addModURL(new URL(mod),modName);
                                     } else if (mod.endsWith("jar")) {
-                                        addModURL(new URL(mod));
+                                        addModURL(new URL(mod),modName);
                                     }
                                 }
                             }
                         } else {
                             String[] mods = str.substring(5).split(",");
-                            for (File files : dModFiles()) {
-                                files.delete();
-                            }
                             for (String mod : mods) {
                                 if (!mod.startsWith("http") && !mod.startsWith("https")) {
-                                    addModPath(mod);
+                                    addModPath(mod,modName);
                                 } else {
                                     if (mod.endsWith("zip")) {
-                                        addModURL(new URL(mod));
+                                        addModURL(new URL(mod),modName);
                                     } else if (mod.endsWith("jar")) {
-                                        addModURL(new URL(mod));
+                                        addModURL(new URL(mod),modName);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else if (str.startsWith("load-config: ") || str.startsWith("load-config:")) {
+                    if (str.contains(",")) {
+                        if (str.startsWith("load-config: ")) {
+                            String[] mods = str.substring(13).split(",");
+                            for (String mod : mods) {
+                                if ((!mod.startsWith("http") && !mod.substring(5,5).equalsIgnoreCase("s")) && !mod.startsWith("https")) {
+                                    addConfig(mod);
+                                } else {
+                                    if (mod.startsWith("http") && mod.substring(5,5).equalsIgnoreCase("s")) {
+                                        addConfig(new URL(mod));
+                                    } else {
+                                        addConfig(new URL(mod));
+                                    }
+                                }
+                            }
+                        } else {
+                            String[] mods = str.substring(12).split(",");
+                            for (String mod : mods) {
+                                if ((!mod.startsWith("http") && !mod.substring(5,5).equalsIgnoreCase("s")) && !mod.startsWith("https")) {
+                                    addConfig(mod);
+                                } else {
+                                    if (mod.startsWith("http") && mod.substring(5,5).equalsIgnoreCase("s")) {
+                                        addConfig(new URL(mod));
+                                    } else {
+                                        addConfig(new URL(mod));
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        if (str.startsWith("load-config: ")) {
+                            String[] mods = str.substring(13).split(",");
+                            for (String mod : mods) {
+                                if ((!mod.startsWith("http") && !mod.substring(5,5).equalsIgnoreCase("s")) && !mod.startsWith("https")) {
+                                    addConfig(mod);
+                                } else {
+                                    if (mod.startsWith("http") && mod.substring(5,5).equalsIgnoreCase("s")) {
+                                        addConfig(new URL(mod));
+                                    } else {
+                                        addConfig(new URL(mod));
+                                    }
+                                }
+                            }
+                        } else {
+                            String[] mods = str.substring(12).split(",");
+                            for (String mod : mods) {
+                                if ((!mod.startsWith("http") && !mod.substring(5,5).equalsIgnoreCase("s")) && !mod.startsWith("https")) {
+                                    addConfig(mod);
+                                } else {
+                                    if (mod.startsWith("http") && mod.substring(5,5).equalsIgnoreCase("s")) {
+                                        addConfig(new URL(mod));
+                                    } else {
+                                        addConfig(new URL(mod));
                                     }
                                 }
                             }
@@ -265,7 +340,7 @@ public class AML implements IFMLLoadingPlugin{
             addMod(file);
         }
 
-        private void download(InputStream is, int sizeGuess, File target) throws Exception {
+        private void download(InputStream is, int sizeGuess, File target,String modLoading) throws Exception {
             try {
                 byte[] buffer = new byte[4096];
                 int n = - 1;
@@ -280,21 +355,46 @@ public class AML implements IFMLLoadingPlugin{
 
 
                 ZipFile zip = new ZipFile(target);
-                ZipEntry e = zip.getEntry("config" + File.separator);
+                ZipEntry e = zip.getEntry("config.info");
                 if (e == null) {
                     ((LaunchClassLoader) AML.class.getClassLoader()).addURL(target.toURI().toURL());
                     modsLoaded.add(target);
                     if (target.getPath().contains("/")) {
-                        AMLCore.logger.info("Loaded File: " + target.getPath().substring(target.getPath().lastIndexOf("/") + 1));
+                        AMLCore.logger.info("Loaded File: " + target.getPath().substring(target.getPath().lastIndexOf("/") + 1) + " (By " + modLoading + ")");
                     } else if (target.getPath().contains("\\")){
-                        AMLCore.logger.info("Loaded File: " + target.getPath().substring(target.getPath().lastIndexOf("\\") + 1));
+                        AMLCore.logger.info("Loaded File: " + target.getPath().substring(target.getPath().lastIndexOf("\\") + 1) + " (By " + modLoading + ")");
                     } else {
-                        AMLCore.logger.info("Loaded File: " + target.getPath());
+                        AMLCore.logger.info("Loaded File: " + target.getPath() + " (By " + modLoading + ")");
                     }
                 } else {
                     unzip(target,mcDir);
                 }
                 zip.close();
+
+                /*}
+                else
+                {
+                    throw new RuntimeException(String.format("The downloaded file %s has an invalid checksum %s (expecting %s). The download did not succeed correctly and the file has been deleted. Please try launching again.", target.getName(), cksum, validationHash));
+                }*/
+            } catch (Exception e) {
+                throw e;
+            }
+        }
+
+        private void downloadConfig(InputStream is, int sizeGuess, File target) throws Exception {
+            try {
+                byte[] buffer = new byte[4096];
+                int n = - 1;
+
+                OutputStream output = new FileOutputStream(target);
+                while ( (n = is.read(buffer)) != -1)
+                {
+
+                    output.write(buffer, 0, n);
+                }
+                output.close();
+
+                unzip(target,mcDir);
 
                 /*}
                 else

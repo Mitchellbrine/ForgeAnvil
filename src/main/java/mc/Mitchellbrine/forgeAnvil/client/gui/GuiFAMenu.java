@@ -196,7 +196,7 @@ public class GuiFAMenu extends GuiScreen implements GuiYesNoCallback
         else
         {
             this.addSingleplayerMultiplayerButtons(i, 24);
-            this.buttonList.add(new GuiButton(20, this.width - 100, 0, 98, 20, "ForgeAnvil Credits"));
+            this.buttonList.add(new GuiButton(20, this.width - 100, 0, 98, 20, "ForgeAnvil/AML"));
         }
 
         this.buttonList.add(new GuiButton(0, this.width / 2 - 100, i + 72 + 12, 98, 20, I18n.format("menu.options", new Object[0])));
