@@ -40,7 +40,7 @@ public AMLCore() {
     meta.url = "http://goo.gl/iJCwj6";
     meta.updateUrl = "";
     meta.screenshots = new String[0];
-    meta.logoFile = "";
+    meta.logoFile = "/aml-logo.png";
     logger.info("Loading AML...");
     if (dModFiles() != null) {
         for (File file : dModFiles()) {

@@ -23,6 +23,7 @@ build/
 *.ipr
 *.iws
 out/
+anvil.png
 
 # External tool builders
 .externalToolBuilders/

@@ -24,9 +24,10 @@
   "url": "",
   "updateUrl": "",
   "authorList": ["Mitchellbrine"],
-  " credits ": "The Forge and FML guys, for dealing with the name and making MinecraftForge",
-  " logoFile ": "aml-logo.png",
-  " screenshots ": [],
-  " dependencies ": []}
+  "credits": "The Forge and FML guys, for dealing with the name and making MinecraftForge",
+  "logoFile": "aml-logo.png",
+  "screenshots": [],
+  "dependencies": []
+  }
 ]
 }
