@@ -31,12 +31,10 @@ public class AML implements IFMLLoadingPlugin{
 
     }
 
-    private static void addConfig(String path) {
+    private static void addAndUnzip(String path) {
         try {
             URI uri = new URI(path);
             File file = new File(uri);
-            ZipFile zip = new ZipFile(file);
-
             AMLInst.unzip(file, AML.inst.mcDir);
 
         } catch (Exception ex) {
@@ -44,7 +42,7 @@ public class AML implements IFMLLoadingPlugin{
         }
     }
 
-    private static void addConfig(URL url) {
+    private static void addAndUnzip(URL url) {
         try {
             File libFile = new File("ForgeAnvil/downloaded-configs/"+url.getPath().substring(url.getPath().lastIndexOf("/")));
             URLConnection connection = url.openConnection();
@@ -147,6 +145,7 @@ public class AML implements IFMLLoadingPlugin{
     public static void load() {
         if (inst == null) {
             inst = new AMLInst();
+            System.err.println(AMLCore.instance.getMetadata().logoFile);
             AMLCore.logger.info("Beginning loading for mods...");
             inst.scanForMods();
         }
@@ -217,11 +216,10 @@ public class AML implements IFMLLoadingPlugin{
                     if (str.startsWith("author: ")) authorName = str.substring(8);
                     else authorName = str.substring(7);
                 } else if (str.startsWith("load: ") || str.startsWith("load:")) {
-                    if (str.contains(",")) {
                         if (str.startsWith("load: ")) {
                             String[] mods = str.substring(6).split(",");
                             for (String mod : mods) {
-                                if (!mod.startsWith("http") && !mod.startsWith("https")) {
+                                if ((!mod.startsWith("http") && !mod.substring(5,5).equalsIgnoreCase("s")) && !mod.startsWith("https")) {
                                     addModPath(mod,modName);
                                 } else {
                                     if (mod.endsWith("zip")) {
@@ -234,7 +232,7 @@ public class AML implements IFMLLoadingPlugin{
                         } else {
                             String[] mods = str.substring(5).split(",");
                             for (String mod : mods) {
-                                if (!mod.startsWith("http") && !mod.startsWith("https")) {
+                                if ((!mod.startsWith("http") && !mod.substring(5,5).equalsIgnoreCase("s")) && !mod.startsWith("https")) {
                                     addModPath(mod,modName);
                                 } else {
                                     if (mod.endsWith("zip")) {
@@ -244,48 +242,18 @@ public class AML implements IFMLLoadingPlugin{
                                     }
                                 }
                             }
-                        }
-                    } else {
-                        if (str.startsWith("load: ")) {
-                            String[] mods = str.substring(6).split(",");
-                            for (String mod : mods) {
-                                if (!mod.startsWith("http") && !mod.startsWith("https")) {
-                                    addModPath(mod,modName);
-                                } else {
-                                    if (mod.endsWith("zip")) {
-                                        addModURL(new URL(mod),modName);
-                                    } else if (mod.endsWith("jar")) {
-                                        addModURL(new URL(mod),modName);
-                                    }
-                                }
-                            }
-                        } else {
-                            String[] mods = str.substring(5).split(",");
-                            for (String mod : mods) {
-                                if (!mod.startsWith("http") && !mod.startsWith("https")) {
-                                    addModPath(mod,modName);
-                                } else {
-                                    if (mod.endsWith("zip")) {
-                                        addModURL(new URL(mod),modName);
-                                    } else if (mod.endsWith("jar")) {
-                                        addModURL(new URL(mod),modName);
-                                    }
-                                }
-                            }
-                        }
                     }
                 } else if (str.startsWith("load-config: ") || str.startsWith("load-config:")) {
-                    if (str.contains(",")) {
                         if (str.startsWith("load-config: ")) {
                             String[] mods = str.substring(13).split(",");
                             for (String mod : mods) {
                                 if ((!mod.startsWith("http") && !mod.substring(5,5).equalsIgnoreCase("s")) && !mod.startsWith("https")) {
-                                    addConfig(mod);
+                                    addAndUnzip(mod);
                                 } else {
                                     if (mod.startsWith("http") && mod.substring(5,5).equalsIgnoreCase("s")) {
-                                        addConfig(new URL(mod));
+                                        addAndUnzip(new URL(mod));
                                     } else {
-                                        addConfig(new URL(mod));
+                                        addAndUnzip(new URL(mod));
                                     }
                                 }
                             }
@@ -293,41 +261,40 @@ public class AML implements IFMLLoadingPlugin{
                             String[] mods = str.substring(12).split(",");
                             for (String mod : mods) {
                                 if ((!mod.startsWith("http") && !mod.substring(5,5).equalsIgnoreCase("s")) && !mod.startsWith("https")) {
-                                    addConfig(mod);
+                                    addAndUnzip(mod);
                                 } else {
                                     if (mod.startsWith("http") && mod.substring(5,5).equalsIgnoreCase("s")) {
-                                        addConfig(new URL(mod));
+                                        addAndUnzip(new URL(mod));
                                     } else {
-                                        addConfig(new URL(mod));
+                                        addAndUnzip(new URL(mod));
                                     }
                                 }
                             }
                         }
-                    } else {
-                        if (str.startsWith("load-config: ")) {
-                            String[] mods = str.substring(13).split(",");
-                            for (String mod : mods) {
-                                if ((!mod.startsWith("http") && !mod.substring(5,5).equalsIgnoreCase("s")) && !mod.startsWith("https")) {
-                                    addConfig(mod);
+                } else if (str.startsWith("load-unzip: ") || str.startsWith("load-unzip:")) {
+                    if (str.startsWith("load-unzip: ")) {
+                        String[] mods = str.substring(12).split(",");
+                        for (String mod : mods) {
+                            if ((!mod.startsWith("http") && !mod.substring(5, 5).equalsIgnoreCase("s")) && !mod.startsWith("https")) {
+                                addAndUnzip(mod);
+                            } else {
+                                if (mod.startsWith("http") && mod.substring(5, 5).equalsIgnoreCase("s")) {
+                                    addAndUnzip(new URL(mod));
                                 } else {
-                                    if (mod.startsWith("http") && mod.substring(5,5).equalsIgnoreCase("s")) {
-                                        addConfig(new URL(mod));
-                                    } else {
-                                        addConfig(new URL(mod));
-                                    }
+                                    addAndUnzip(new URL(mod));
                                 }
                             }
-                        } else {
-                            String[] mods = str.substring(12).split(",");
-                            for (String mod : mods) {
-                                if ((!mod.startsWith("http") && !mod.substring(5,5).equalsIgnoreCase("s")) && !mod.startsWith("https")) {
-                                    addConfig(mod);
+                        }
+                    } else {
+                        String[] mods = str.substring(11).split(",");
+                        for (String mod : mods) {
+                            if ((!mod.startsWith("http") && !mod.substring(5, 5).equalsIgnoreCase("s")) && !mod.startsWith("https")) {
+                                addAndUnzip(mod);
+                            } else {
+                                if (mod.startsWith("http") && mod.substring(5, 5).equalsIgnoreCase("s")) {
+                                    addAndUnzip(new URL(mod));
                                 } else {
-                                    if (mod.startsWith("http") && mod.substring(5,5).equalsIgnoreCase("s")) {
-                                        addConfig(new URL(mod));
-                                    } else {
-                                        addConfig(new URL(mod));
-                                    }
+                                    addAndUnzip(new URL(mod));
                                 }
                             }
                         }

@@ -77,6 +77,7 @@ public class AnvilMod {
         FMLCommonHandler.instance().bus().register(this);
     }
 
+    @SuppressWarnings("deprecation")
     public AnvilMod(String modid, int useMODID, String version) {
         if (useMODID == 1) {
             MODID.add(modid);
