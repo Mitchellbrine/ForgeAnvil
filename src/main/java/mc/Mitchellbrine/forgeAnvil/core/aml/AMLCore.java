@@ -30,6 +30,17 @@ public class AMLCore extends DummyModContainer{
 
 public AMLCore() {
     super(new ModMetadata());
+    ModMetadata meta = getMetadata();
+    meta.modId = "AML";
+    meta.name = "AnvilModLoader";
+    meta.version = "1.0";
+    meta.credits = "All the Forge Anvil Team";
+    meta.authorList = Arrays.asList("Mitchellbrine");
+    meta.description = "An easy one file way to load dependencies and modpacks!";
+    meta.url = "http://goo.gl/iJCwj6";
+    meta.updateUrl = "";
+    meta.screenshots = new String[0];
+    meta.logoFile = "";
     logger.info("Loading AML...");
     if (dModFiles() != null) {
         for (File file : dModFiles()) {

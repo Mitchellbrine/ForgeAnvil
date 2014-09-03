@@ -1,32 +1,32 @@
 {
-	"modListVersion" : 2,
-	"modList":
-	[{
-	  "modid": "ForgeAnvil",
-	  "name": "ForgeAnvil",
-	  "description": "A Utilities mod so I don 't reinvent the wheel OVER AND OVER AGAIN!",
-	  "version": "1.0",
-	  "mcversion": "1.7.10",
-	  "url": "",
-	  "updateUrl": "",
-	  "authorList": ["Mitchellbrine","LexManos (Jk, but don' t rage)"],
-	  "credits": "The Forge and FML guys, for dealing with the name and making MinecraftForge",
-	  "logoFile": "anvil-logo.png",
-	  "screenshots": [],
-	  "dependencies": []
-	},
-	{
-	  "modid": "AML",
-	  "name": "AnvilModLoader",
-	  "description ": "An easy one file way to load dependencies and modpacks!",
-	  "version": "1.0",
-	  "mcversion": "1.7.10",
-	  "url": "",
-	  "updateUrl": "",
-	  "authorList": ["Mitchellbrine"],
-	  " credits ": "The Forge and FML guys, for dealing with the name and making MinecraftForge",
-	  " logoFile ": "aml-logo.png",
-	  " screenshots ": [],
-	  " dependencies ": []}
-	]
-	}
+"modListVersion" : 2,
+"modList":
+[{
+  "modid": "ForgeAnvil",
+  "name": "ForgeAnvil",
+  "description": "A Utilities mod so I don 't reinvent the wheel OVER AND OVER AGAIN!",
+  "version": "1.0",
+  "mcversion": "1.7.10",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["Mitchellbrine","LexManos (Jk, but don' t rage)"],
+  "credits": "The Forge and FML guys, for dealing with the name and making MinecraftForge",
+  "logoFile": "anvil-logo.png",
+  "screenshots": [],
+  "dependencies": []
+},
+{
+  "modid": "AML",
+  "name": "AnvilModLoader",
+  "description ": "An easy one file way to load dependencies and modpacks!",
+  "version": "1.0",
+  "mcversion": "1.7.10",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["Mitchellbrine"],
+  " credits ": "The Forge and FML guys, for dealing with the name and making MinecraftForge",
+  " logoFile ": "aml-logo.png",
+  " screenshots ": [],
+  " dependencies ": []}
+]
+}
